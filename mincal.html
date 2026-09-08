@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalorieTrack</title>
+
+<style>
+:root {
+  --bg: #f4f6f8;
+  --card: #ffffff;
+  --text: #18202a;
+  --muted: #6b7280;
+  --primary: #4f46e5;
+  --primary-light: #eef2ff;
+  --green: #16a34a;
+  --red: #dc2626;
+  --border: #e5e7eb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 18px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-inner {
+  max-width: 900px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+nav button {
+  white-space: nowrap;
+  border: 0;
+  background: var(--card);
+  padding: 11px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+nav button.active {
+  background: var(--primary);
+  color: white;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.03);
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat {
+  background: var(--primary-light);
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat strong {
+  display: block;
+  font-size: 25px;
+  margin-bottom: 5px;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  background: white;
+}
+
+button.primary,
+button.danger,
+button.secondary {
+  border: 0;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button.primary {
+  background: var(--primary);
+  color: white;
+}
+
+button.secondary {
+  background: #eef0f3;
+  color: var(--text);
+}
+
+button.danger {
+  background: #fee2e2;
+  color: var(--red);
+}
+
+.progress {
+  height: 13px;
+  background: #e5e7eb;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--primary);
+  width: 0%;
+  transition: width .3s;
+}
+
+.macro {
+  margin-bottom: 15px;
+}
+
+.macro-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.food-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.food-item:last-child {
+  border-bottom: 0;
+}
+
+.food-info strong {
+  display: block;
+}
+
+.food-info small {
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actions button {
+  border: 0;
+  background: #f1f3f5;
+  border-radius: 8px;
+  padding: 7px 9px;
+  cursor: pointer;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 20px 0;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-box {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.form-row {
+  margin-bottom: 14px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.modal-buttons button {
+  flex: 1;
+}
+
+.date-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.date-control input {
+  max-width: 180px;
+}
+
+.notice {
+  padding: 12px;
+  background: #fff7ed;
+  border-radius: 10px;
+  color: #9a3412;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.goal-bar {
+  height: 18px;
+  background: #e5e7eb;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  background: var(--green);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+@media(max-width: 600px) {
+  .grid,
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stat strong {
+    font-size: 20px;
+  }
+
+  .container {
+    padding: 14px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">CalorieTrack</div>
+    <div id="headerCalories">0 kcal</div>
+  </div>
+</header>
+
+<div class="container">
+
+<nav>
+  <button class="active" onclick="showPage('home', this)">Home</button>
+  <button onclick="showPage('log', this)">Log Food</button>
+  <button onclick="showPage('progress', this)">Progress</button>
+  <button onclick="showPage('settings', this)">Settings</button>
+</nav>
+
+<!-- HOME -->
+<section id="home" class="page active">
+
+  <div class="date-control">
+    <button class="secondary" onclick="changeDate(-1)">‹</button>
+    <input type="date" id="selectedDate" onchange="render()">
+    <button class="secondary" onclick="changeDate(1)">›</button>
+  </div>
+
+  <div class="card">
+    <h2>Today's Calories</h2>
+
+    <div class="stats">
+      <div class="stat">
+        <strong id="targetCalories">0</strong>
+        Target
+      </div>
+
+      <div class="stat">
+        <strong id="eatenCalories">0</strong>
+        Eaten
+      </div>
+
+      <div class="stat">
+        <strong id="remainingCalories">0</strong>
+        Remaining
+      </div>
+    </div>
+
+    <div class="progress" style="margin-top:20px">
+      <div id="calorieProgress" class="progress-bar"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Macros</h2>
+
+    <div class="macro">
+      <div class="macro-header">
+        <span>Protein</span>
+        <span id="proteinText">0 / 0 g</span>
+      </div>
+      <div class="progress">
+        <div id="proteinProgress" class="progress-bar"></div>
+      </div>
+    </div>
+
+    <div class="macro">
+      <div class="macro-header">
+        <span>Carbohydrates</span>
+        <span id="carbsText">0 / 0 g</span>
+      </div>
+      <div class="progress">
+        <div id="carbsProgress" class="progress-bar"></div>
+      </div>
+    </div>
+
+    <div class="macro">
+      <div class="macro-header">
+        <span>Fat</span>
+        <span id="fatText">0 / 0 g</span>
+      </div>
+      <div class="progress">
+        <div id="fatProgress" class="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Today's Food</h2>
+    <div id="todayFood"></div>
+  </div>
+
+</section>
+
+<!-- LOG -->
+<section id="log" class="page">
+
+  <div class="card">
+    <h2>Add Food</h2>
+
+    <div class="grid">
+
+      <div>
+        <label>Food name</label>
+        <input id="foodName" placeholder="e.g. Chicken breast">
+      </div>
+
+      <div>
+        <label>Meal</label>
+        <select id="foodMeal">
+          <option>Breakfast</option>
+          <option>Lunch</option>
+          <option>Dinner</option>
+          <option>Snack</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Calories</label>
+        <input id="foodCalories" type="number" min="0" placeholder="300">
+      </div>
+
+      <div>
+        <label>Protein (g)</label>
+        <input id="foodProtein" type="number" min="0" placeholder="30">
+      </div>
+
+      <div>
+        <label>Carbs (g)</label>
+        <input id="foodCarbs" type="number" min="0" placeholder="20">
+      </div>
+
+      <div>
+        <label>Fat (g)</label>
+        <input id="foodFat" type="number" min="0" placeholder="10">
+      </div>
+
+    </div>
+
+    <br>
+
+    <button class="primary" onclick="addFood()">Add Food</button>
+  </div>
+
+  <div class="card">
+    <h2>Saved Foods</h2>
+    <div id="savedFoods"></div>
+  </div>
+
+</section>
+
+<!-- PROGRESS -->
+<section id="progress" class="page">
+
+  <div class="card">
+    <h2>Weight Progress</h2>
+
+    <div class="grid">
+
+      <div>
+        <label>Current weight (kg)</label>
+        <input id="weightInput" type="number" step="0.1">
+      </div>
+
+      <div>
+        <label>Weight date</label>
+        <input id="weightDate" type="date">
+      </div>
+
+    </div>
+
+    <br>
+
+    <button class="primary" onclick="saveWeight()">Save Weight</button>
+  </div>
+
+  <div class="card">
+    <h2>Goal</h2>
+
+    <p>
+      Current: <strong id="currentWeightDisplay">0 kg</strong>
+    </p>
+
+    <p>
+      Goal: <strong id="goalWeightDisplay">0 kg</strong>
+    </p>
+
+    <div class="goal-bar">
+      <div id="goalFill" class="goal-fill"></div>
+    </div>
+
+    <p id="goalText"></p>
+  </div>
+
+  <div class="card">
+    <h2>Weight History</h2>
+    <div id="weightHistory"></div>
+  </div>
+
+</section>
+
+<!-- SETTINGS -->
+<section id="settings" class="page">
+
+  <div class="card">
+    <h2>Profile</h2>
+
+    <div class="grid">
+
+      <div>
+        <label>Age</label>
+        <input id="age" type="number">
+      </div>
+
+      <div>
+        <label>Sex</label>
+        <select id="sex">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Height (cm)</label>
+        <input id="height" type="number">
+      </div>
+
+      <div>
+        <label>Weight (kg)</label>
+        <input id="weight" type="number" step="0.1">
+      </div>
+
+      <div>
+        <label>Goal weight (kg)</label>
+        <input id="goalWeight" type="number" step="0.1">
+      </div>
+
+      <div>
+        <label>Activity level</label>
+        <select id="activity">
+          <option value="1.2">Sedentary</option>
+          <option value="1.375">Lightly active</option>
+          <option value="1.55">Moderately active</option>
+          <option value="1.725">Very active</option>
+          <option value="1.9">Extremely active</option>
+        </select>
+      </div>
+
+    </div>
+
+    <br>
+
+    <button class="primary" onclick="calculateTarget()">Calculate Target</button>
+
+    <div class="notice">
+      Calorie and TDEE calculations are estimates and should not be treated as medical advice.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your Targets</h2>
+
+    <div class="stats">
+      <div class="stat">
+        <strong id="bmrDisplay">0</strong>
+        BMR
+      </div>
+
+      <div class="stat">
+        <strong id="tdeeDisplay">0</strong>
+        TDEE
+      </div>
+
+      <div class="stat">
+        <strong id="targetDisplay">0</strong>
+        Target
+      </div>
+    </div>
+
+    <br>
+
+    <label>Daily calorie target</label>
+    <input id="manualTarget" type="number">
+
+    <br><br>
+
+    <label>Protein target (g)</label>
+    <input id="proteinTarget" type="number">
+
+    <br><br>
+
+    <label>Carbohydrate target (g)</label>
+    <input id="carbTarget" type="number">
+
+    <br><br>
+
+    <label>Fat target (g)</label>
+    <input id="fatTarget" type="number">
+
+    <br><br>
+
+    <button class="primary" onclick="saveTargets()">Save Targets</button>
+  </div>
+
+  <div class="card">
+    <h2>Data</h2>
+
+    <button class="secondary" onclick="exportData()">Export Data</button>
+    <button class="secondary" onclick="document.getElementById('importFile').click()">Import Data</button>
+
+    <input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)">
+
+    <br><br>
+
+    <button class="danger" onclick="resetData()">Reset All Data</button>
+  </div>
+
+</section>
+
+</div>
+
+<!-- MODAL -->
+<div id="editModal" class="modal">
+  <div class="modal-box">
+
+    <h2>Edit Food</h2>
+
+    <input type="hidden" id="editIndex">
+
+    <div class="form-row">
+      <label>Food name</label>
+      <input id="editName">
+    </div>
+
+    <div class="form-row">
+      <label>Meal</label>
+      <select id="editMeal">
+        <option>Breakfast</option>
+        <option>Lunch</option>
+        <option>Dinner</option>
+        <option>Snack</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Calories</label>
+      <input id="editCalories" type="number">
+    </div>
+
+    <div class="form-row">
+      <label>Protein</label>
+      <input id="editProtein" type="number">
+    </div>
+
+    <div class="form-row">
+      <label>Carbs</label>
+      <input id="editCarbs" type="number">
+    </div>
+
+    <div class="form-row">
+      <label>Fat</label>
+      <input id="editFat" type="number">
+    </div>
+
+    <div class="modal-buttons">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveEdit()">Save</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("calorieTrackData")) || {
+  profile: {
+    age: 25,
+    sex: "male",
+    height: 175,
+    weight: 70,
+    goalWeight: 65,
+    activity: 1.375
+  },
+
+  targets: {
+    calories: 2000,
+    protein: 140,
+    carbs: 200,
+    fat: 65,
+    bmr: 0,
+    tdee: 0
+  },
+
+  foods: {},
+
+  savedFoods: [],
+
+  weights: []
+};
+
+let selectedDate = new Date().toISOString().split("T")[0];
+
+document.getElementById("selectedDate").value = selectedDate;
+document.getElementById("weightDate").value = selectedDate;
+
+function saveData() {
+  localStorage.setItem("calorieTrackData", JSON.stringify(data));
+}
+
+function getFoods() {
+  return data.foods[selectedDate] || [];
+}
+
+function setFoods(foods) {
+  data.foods[selectedDate] = foods;
+  saveData();
+}
+
+function showPage(page, button) {
+
+  document.querySelectorAll(".page").forEach(p => {
+    p.classList.remove("active");
+  });
+
+  document.getElementById(page).classList.add("active");
+
+  document.querySelectorAll("nav button").forEach(b => {
+    b.classList.remove("active");
+  });
+
+  button.classList.add("active");
+
+  render();
+}
+
+function changeDate(days) {
+
+  let date = new Date(selectedDate + "T12:00:00");
+  date.setDate(date.getDate() + days);
+
+  selectedDate = date.toISOString().split("T")[0];
+
+  document.getElementById("selectedDate").value = selectedDate;
+
+  render();
+}
+
+function calculateTarget() {
+
+  let age = Number(document.getElementById("age").value);
+  let sex = document.getElementById("sex").value;
+  let height = Number(document.getElementById("height").value);
+  let weight = Number(document.getElementById("weight").value);
+  let activity = Number(document.getElementById("activity").value);
+
+  if (!age || !height || !weight) {
+    alert("Please fill in your age, height and weight.");
+    return;
+  }
+
+  let bmr;
+
+  if (sex === "male") {
+    bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  } else {
+    bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+  }
+
+  let tdee = bmr * activity;
+
+  // Moderate default deficit
+  let target = Math.max(Math.round(tdee - 500), 1200);
+
+  data.profile.age = age;
+  data.profile.sex = sex;
+  data.profile.height = height;
+  data.profile.weight = weight;
+  data.profile.activity = activity;
+
+  data.targets.bmr = Math.round(bmr);
+  data.targets.tdee = Math.round(tdee);
+  data.targets.calories = target;
+
+  // Simple starting macro targets
+  data.targets.protein = Math.round(weight * 2);
+  data.targets.fat = Math.round((target * 0.25) / 9);
+
+  let proteinCalories = data.targets.protein * 4;
+  let fatCalories = data.targets.fat * 9;
+
+  data.targets.carbs = Math.max(
+    0,
+    Math.round((target - proteinCalories - fatCalories) / 4)
+  );
+
+  saveData();
+
+  loadSettings();
+
+  alert("Your estimated calorie target has been calculated.");
+}
+
+function saveTargets() {
+
+  data.targets.calories = Number(document.getElementById("manualTarget").value);
+  data.targets.protein = Number(document.getElementById("proteinTarget").value);
+  data.targets.carbs = Number(document.getElementById("carbTarget").value);
+  data.targets.fat = Number(document.getElementById("fatTarget").value);
+
+  saveData();
+  render();
+
+  alert("Targets saved.");
+}
+
+function addFood() {
+
+  let name = document.getElementById("foodName").value.trim();
+  let meal = document.getElementById("foodMeal").value;
+
+  let calories = Number(document.getElementById("foodCalories").value);
+  let protein = Number(document.getElementById("foodProtein").value);
+  let carbs = Number(document.getElementById("foodCarbs").value);
+  let fat = Number(document.getElementById("foodFat").value);
+
+  if (!name || !calories) {
+    alert("Please enter at least a food name and calories.");
+    return;
+  }
+
+  let foods = getFoods();
+
+  foods.push({
+    name,
+    meal,
+    calories,
+    protein,
+    carbs,
+    fat
+  });
+
+  setFoods(foods);
+
+  // Save to saved foods if not already there
+  if (!data.savedFoods.some(f => f.name.toLowerCase() === name.toLowerCase())) {
+
+    data.savedFoods.push({
+      name,
+      calories,
+      protein,
+      carbs,
+      fat
+    });
+
+    saveData();
+  }
+
+  document.getElementById("foodName").value = "";
+  document.getElementById("foodCalories").value = "";
+  document.getElementById("foodProtein").value = "";
+  document.getElementById("foodCarbs").value = "";
+  document.getElementById("foodFat").value = "";
+
+  render();
+
+  alert("Food added.");
+}
+
+function addSavedFood(index) {
+
+  let f = data.savedFoods[index];
+
+  let foods = getFoods();
+
+  foods.push({
+    ...f,
+    meal: "Snack"
+  });
+
+  setFoods(foods);
+
+  render();
+}
+
+function deleteFood(index) {
+
+  if (!confirm("Delete this food?")) return;
+
+  let foods = getFoods();
+
+  foods.splice(index, 1);
+
+  setFoods(foods);
+
+  render();
+}
+
+function editFood(index) {
+
+  let f = getFoods()[index];
+
+  document.getElementById("editIndex").value = index;
+  document.getElementById("editName").value = f.name;
+  document.getElementById("editMeal").value = f.meal;
+  document.getElementById("editCalories").value = f.calories;
+  document.getElementById("editProtein").value = f.protein;
+  document.getElementById("editCarbs").value = f.carbs;
+  document.getElementById("editFat").value = f.fat;
+
+  document.getElementById("editModal").classList.add("show");
+}
+
+function closeModal() {
+  document.getElementById("editModal").classList.remove("show");
+}
+
+function saveEdit() {
+
+  let index = Number(document.getElementById("editIndex").value);
+
+  let foods = getFoods();
+
+  foods[index] = {
+    name: document.getElementById("editName").value,
+    meal: document.getElementById("editMeal").value,
+    calories: Number(document.getElementById("editCalories").value),
+    protein: Number(document.getElementById("editProtein").value),
+    carbs: Number(document.getElementById("editCarbs").value),
+    fat: Number(document.getElementById("editFat").value)
+  };
+
+  setFoods(foods);
+
+  closeModal();
+
+  render();
+}
+
+function saveWeight() {
+
+  let weight = Number(document.getElementById("weightInput").value);
+  let date = document.getElementById("weightDate").value;
+
+  if (!weight || !date) {
+    alert("Enter a weight and date.");
+    return;
+  }
+
+  data.weights = data.weights.filter(w => w.date !== date);
+
+  data.weights.push({
+    date,
+    weight
+  });
+
+  data.weights.sort((a,b) => a.date.localeCompare(b.date));
+
+  data.profile.weight = weight;
+
+  saveData();
+
+  render();
+
+  alert("Weight saved.");
+}
+
+function loadSettings() {
+
+  let p = data.profile;
+  let t = data.targets;
+
+  document.getElementById("age").value = p.age;
+  document.getElementById("sex").value = p.sex;
+  document.getElementById("height").value = p.height;
+  document.getElementById("weight").value = p.weight;
+  document.getElementById("goalWeight").value = p.goalWeight;
+  document.getElementById("activity").value = p.activity;
+
+  document.getElementById("bmrDisplay").textContent = t.bmr || 0;
+  document.getElementById("tdeeDisplay").textContent = t.tdee || 0;
+  document.getElementById("targetDisplay").textContent = t.calories || 0;
+
+  document.getElementById("manualTarget").value = t.calories || "";
+  document.getElementById("proteinTarget").value = t.protein || "";
+  document.getElementById("carbTarget").value = t.carbs || "";
+  document.getElementById("fatTarget").value = t.fat || "";
+}
+
+function renderHome() {
+
+  let foods = getFoods();
+
+  let calories = foods.reduce((sum,f) => sum + Number(f.calories), 0);
+  let protein = foods.reduce((sum,f) => sum + Number(f.protein || 0), 0);
+  let carbs = foods.reduce((sum,f) => sum + Number(f.carbs || 0), 0);
+  let fat = foods.reduce((sum,f) => sum + Number(f.fat || 0), 0);
+
+  let target = data.targets.calories || 0;
+
+  document.getElementById("targetCalories").textContent = Math.round(target);
+  document.getElementById("eatenCalories").textContent = Math.round(calories);
+
+  document.getElementById("remainingCalories").textContent =
+    Math.round(target - calories);
+
+  document.getElementById("headerCalories").textContent =
+    Math.round(calories) + " kcal";
+
+  setProgress("calorieProgress", calories, target);
+
+  document.getElementById("proteinText").textContent =
+    Math.round(protein) + " / " + (data.targets.protein || 0) + " g";
+
+  document.getElementById("carbsText").textContent =
+    Math.round(carbs) + " / " + (data.targets.carbs || 0) + " g";
+
+  document.getElementById("fatText").textContent =
+    Math.round(fat) + " / " + (data.targets.fat || 0) + " g";
+
+  setProgress("proteinProgress", protein, data.targets.protein);
+  setProgress("carbsProgress", carbs, data.targets.carbs);
+  setProgress("fatProgress", fat, data.targets.fat);
+
+  let html = "";
+
+  ["Breakfast","Lunch","Dinner","Snack"].forEach(meal => {
+
+    let mealFoods = foods.filter(f => f.meal === meal);
+
+    html += `<h3>${meal}</h3>`;
+
+    if (mealFoods.length === 0) {
+
+      html += `<div class="empty">No food logged.</div>`;
+
+    } else {
+
+      mealFoods.forEach(f => {
+
+        let index = foods.indexOf(f);
+
+        html += `
+        <div class="food-item">
+          <div class="food-info">
+            <strong>${escapeHtml(f.name)}</strong>
+            <small>
+              ${Math.round(f.calories)} kcal ·
+              P ${Math.round(f.protein || 0)}g ·
+              C ${Math.round(f.carbs || 0)}g ·
+              F ${Math.round(f.fat || 0)}g
+            </small>
+          </div>
+
+          <div class="actions">
+            <button onclick="editFood(${index})">Edit</button>
+            <button onclick="deleteFood(${index})">×</button>
+          </div>
+        </div>`;
+      });
+    }
+  });
+
+  document.getElementById("todayFood").innerHTML = html;
+}
+
+function renderSavedFoods() {
+
+  let container = document.getElementById("savedFoods");
+
+  if (!data.savedFoods.length) {
+
+    container.innerHTML =
+      `<div class="empty">No saved foods yet. Add a food and it will appear here.</div>`;
+
+    return;
+  }
+
+  container.innerHTML = data.savedFoods.map((f,i) => `
+    <div class="food-item">
+
+      <div class="food-info">
+        <strong>${escapeHtml(f.name)}</strong>
+        <small>
+          ${f.calories} kcal ·
+          P ${f.protein || 0}g ·
+          C ${f.carbs || 0}g ·
+          F ${f.fat || 0}g
+        </small>
+      </div>
+
+      <button class="primary" onclick="addSavedFood(${i})">
+        + Add
+      </button>
+
+    </div>
+  `).join("");
+}
+
+function renderProgress() {
+
+  let weights = data.weights;
+
+  let current = weights.length
+    ? weights[weights.length - 1].weight
+    : data.profile.weight;
+
+  let goal = Number(data.profile.goalWeight);
+
+  document.getElementById("currentWeightDisplay").textContent =
+    current + " kg";
+
+  document.getElementById("goalWeightDisplay").textContent =
+    goal + " kg";
+
+  let start = weights.length
+    ? weights[0].weight
+    : data.profile.weight;
+
+  let progress = 0;
+
+  if (start !== goal) {
+
+    progress =
+      ((start - current) / (start - goal)) * 100;
+
+  }
+
+  progress = Math.max(0, Math.min(100, progress));
+
+  document.getElementById("goalFill").style.width = progress + "%";
+
+  document.getElementById("goalText").textContent =
+    Math.round(progress) + "% of the way from starting weight to goal.";
+
+  let html = "";
+
+  if (!weights.length) {
+
+    html = `<div class="empty">No weight entries yet.</div>`;
+
+  } else {
+
+    html = `
+      <table>
+        <tr>
+          <th>Date</th>
+          <th>Weight</th>
+        </tr>
+        ${weights.slice().reverse().map(w => `
+          <tr>
+            <td>${w.date}</td>
+            <td>${w.weight} kg</td>
+          </tr>
+        `).join("")}
+      </table>
+    `;
+  }
+
+  document.getElementById("weightHistory").innerHTML = html;
+}
+
+function setProgress(id, value, target) {
+
+  let percent = target > 0
+    ? (value / target) * 100
+    : 0;
+
+  percent = Math.max(0, Math.min(100, percent));
+
+  document.getElementById(id).style.width = percent + "%";
+}
+
+function render() {
+
+  renderHome();
+  renderSavedFoods();
+  renderProgress();
+  loadSettings();
+}
+
+function escapeHtml(text) {
+
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function exportData() {
+
+  let blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    {type: "application/json"}
+  );
+
+  let url = URL.createObjectURL(blob);
+
+  let a = document.createElement("a");
+
+  a.href = url;
+  a.download = "calorietrack-backup.json";
+
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+
+  let file = event.target.files[0];
+
+  if (!file) return;
+
+  let reader = new FileReader();
+
+  reader.onload = function(e) {
+
+    try {
+
+      data = JSON.parse(e.target.result);
+
+      saveData();
+
+      render();
+
+      alert("Data imported successfully.");
+
+    } catch {
+
+      alert("That file is not a valid CalorieTrack backup.");
+
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+function resetData() {
+
+  if (!confirm("Are you sure you want to delete ALL your data?")) return;
+
+  localStorage.removeItem("calorieTrackData");
+
+  location.reload();
+}
+
+document.getElementById("selectedDate").addEventListener("change", function() {
+
+  selectedDate = this.value;
+
+  render();
+
+});
+
+render();
+
+</script>
+
+</body>
+</html>
